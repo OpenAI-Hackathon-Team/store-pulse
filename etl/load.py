@@ -16,6 +16,7 @@ Steps:
 Author: Store Pulse Team
 """
 
+<<<<<<< HEAD
 import hashlib
 import json
 import os
@@ -24,6 +25,13 @@ from pathlib import Path
 import pandas as pd
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, inspect, text
+=======
+import os
+from pathlib import Path
+
+from dotenv import load_dotenv
+from sqlalchemy import create_engine, text
+>>>>>>> a30b0c523790c6320c2dec40042b160b97ca9353
 from sqlalchemy.engine import URL
 
 from etl.extract import extract_data
@@ -58,6 +66,7 @@ PROCESSED_DIR = BASE_DIR / "data" / "processed"
 PROCESSED_DIR.mkdir(exist_ok=True)
 
 OUTPUT_CSV = PROCESSED_DIR / "clean_sales.csv"
+<<<<<<< HEAD
 SOURCE_STATE_FILE = PROCESSED_DIR / "source_change_state.json"
 SOURCE_SNAPSHOT_DIR = PROCESSED_DIR / "source_snapshots"
 CORE_TABLE_COLUMNS = {
@@ -272,6 +281,8 @@ def save_source_snapshots(sources: dict[str, pd.DataFrame]):
     SOURCE_SNAPSHOT_DIR.mkdir(exist_ok=True)
     for source_name, df in sources.items():
         df.to_parquet(source_snapshot_path(source_name), index=False)
+=======
+>>>>>>> a30b0c523790c6320c2dec40042b160b97ca9353
 
 
 # ==========================================================
@@ -362,6 +373,7 @@ def save_processed_csv(df):
 # Load Data
 # ==========================================================
 
+<<<<<<< HEAD
 def infer_postgres_type(series: pd.Series) -> str:
     """Return a safe PostgreSQL type for a newly discovered CSV column."""
 
@@ -435,12 +447,17 @@ def remove_obsolete_dynamic_columns(df: pd.DataFrame):
 
 def load_to_database(df):
     """Replace table data while retaining dynamically added Supabase columns."""
+=======
+def load_to_database(df):
+    """Loads dataframe into PostgreSQL."""
+>>>>>>> a30b0c523790c6320c2dec40042b160b97ca9353
 
     print("\n" + "=" * 60)
     print("LOADING DATA INTO POSTGRESQL")
     print("=" * 60)
 
     try:
+<<<<<<< HEAD
         # PostgreSQL uses lowercase identifiers for the existing schema.
         df = df.copy()
         df.columns = df.columns.astype(str).str.strip().str.lower()
@@ -454,6 +471,12 @@ def load_to_database(df):
         # The table structure persists, but the data is a fresh snapshot of
         # the source CSVs. This prevents duplicate records across runs.
         clear_existing_data()
+=======
+        # Convert DataFrame column names to lowercase
+        # so they match PostgreSQL table columns
+        df = df.copy()
+        df.columns = df.columns.str.lower()
+>>>>>>> a30b0c523790c6320c2dec40042b160b97ca9353
 
         df.to_sql(
             name="clean_sales",
@@ -508,6 +531,7 @@ def main():
 
     # Step 3
     train_df, stores_df, features_df = extract_data()
+<<<<<<< HEAD
     source_data = {
         "train.csv": train_df,
         "stores.csv": stores_df,
@@ -523,6 +547,8 @@ def main():
         source_data,
         load_previous_source_snapshots(source_data),
     )
+=======
+>>>>>>> a30b0c523790c6320c2dec40042b160b97ca9353
 
     # Step 4
     final_df = transform_data(
@@ -540,11 +566,14 @@ def main():
     # Step 7
     verify_load()
 
+<<<<<<< HEAD
     # Save the comparison baseline only after all load steps complete.
     save_source_profile(source_profile)
     save_source_snapshots(source_data)
     print_source_change_report(source_change_report)
 
+=======
+>>>>>>> a30b0c523790c6320c2dec40042b160b97ca9353
     print("\n" + "=" * 60)
     print("ETL PIPELINE COMPLETED SUCCESSFULLY")
     print("=" * 60)
@@ -555,4 +584,8 @@ def main():
 # ==========================================================
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     main()
+=======
+    main()
+>>>>>>> a30b0c523790c6320c2dec40042b160b97ca9353

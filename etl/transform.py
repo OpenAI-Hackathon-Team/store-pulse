@@ -17,6 +17,7 @@ Author: Store Pulse Team
 import pandas as pd
 
 
+<<<<<<< HEAD
 FEATURE_NUMERIC_COLUMNS = [
     "Temperature",
     "Fuel_Price",
@@ -42,6 +43,8 @@ def normalise_is_holiday(df):
     return df
 
 
+=======
+>>>>>>> a30b0c523790c6320c2dec40042b160b97ca9353
 # ==========================================================
 # Convert Date Columns
 # ==========================================================
@@ -51,11 +54,16 @@ def convert_dates(train_df, features_df):
     Converts Date columns to datetime format.
     """
 
+<<<<<<< HEAD
     train_df["Date"] = pd.to_datetime(train_df["Date"], errors="coerce")
     features_df["Date"] = pd.to_datetime(features_df["Date"], errors="coerce")
 
     if train_df["Date"].isna().any() or features_df["Date"].isna().any():
         print("Warning: invalid or missing dates were retained as empty values.")
+=======
+    train_df["Date"] = pd.to_datetime(train_df["Date"])
+    features_df["Date"] = pd.to_datetime(features_df["Date"])
+>>>>>>> a30b0c523790c6320c2dec40042b160b97ca9353
 
     return train_df, features_df
 
@@ -66,6 +74,7 @@ def convert_dates(train_df, features_df):
 
 def handle_missing_values(features_df):
     """
+<<<<<<< HEAD
     Clean feature values before the merge.
 
     Feature-only rows are valid: for example, a newly opened store can
@@ -84,6 +93,20 @@ def handle_missing_values(features_df):
         features_df[column] = pd.to_numeric(features_df[column], errors="coerce").fillna(0.0)
 
     features_df = normalise_is_holiday(features_df)
+=======
+    Replace missing values in MarkDown columns with 0.
+    """
+
+    markdown_columns = [
+        "MarkDown1",
+        "MarkDown2",
+        "MarkDown3",
+        "MarkDown4",
+        "MarkDown5"
+    ]
+
+    features_df[markdown_columns] = features_df[markdown_columns].fillna(0)
+>>>>>>> a30b0c523790c6320c2dec40042b160b97ca9353
 
     return features_df
 
@@ -95,14 +118,18 @@ def handle_missing_values(features_df):
 def merge_datasets(train_df, stores_df, features_df):
     """
     Merge train, stores and features datasets.
+<<<<<<< HEAD
 
     An outer merge preserves new feature records even if a matching sale has
     not occurred yet.  Such rows have empty Dept/Weekly_Sales values until
     sales data arrives, but are still available in Supabase.
+=======
+>>>>>>> a30b0c523790c6320c2dec40042b160b97ca9353
     """
 
     merged_df = pd.merge(
         train_df,
+<<<<<<< HEAD
         features_df,
         on=["Store", "Date", "IsHoliday"],
         how="outer"
@@ -116,6 +143,19 @@ def merge_datasets(train_df, stores_df, features_df):
     # compact enough to load without a schema error.
     merged_df["Type"] = merged_df["Type"].fillna("UNK")
     merged_df["Size"] = pd.to_numeric(merged_df["Size"], errors="coerce").fillna(0).astype(int)
+=======
+        stores_df,
+        on="Store",
+        how="left"
+    )
+
+    merged_df = pd.merge(
+        merged_df,
+        features_df,
+        on=["Store", "Date", "IsHoliday"],
+        how="left"
+    )
+>>>>>>> a30b0c523790c6320c2dec40042b160b97ca9353
 
     return merged_df
 
@@ -187,12 +227,15 @@ def transform_data(train_df, stores_df, features_df):
     print("Starting Data Transformation...")
     print("=" * 60)
 
+<<<<<<< HEAD
     # Normalize the shared merge key before converting dates.  A missing or
     # malformed feature flag should not prevent an otherwise valid new feature
     # row from being loaded.
     train_df = normalise_is_holiday(train_df.copy())
     features_df = normalise_is_holiday(features_df.copy())
 
+=======
+>>>>>>> a30b0c523790c6320c2dec40042b160b97ca9353
     # Convert dates
     train_df, features_df = convert_dates(
         train_df,
@@ -240,4 +283,8 @@ if __name__ == "__main__":
     print("FINAL DATASET PREVIEW")
     print("=" * 60)
 
+<<<<<<< HEAD
     print(final_df.head())
+=======
+    print(final_df.head())
+>>>>>>> a30b0c523790c6320c2dec40042b160b97ca9353

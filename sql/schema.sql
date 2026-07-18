@@ -1,4 +1,10 @@
+<<<<<<< HEAD
 CREATE TABLE IF NOT EXISTS clean_sales (
+=======
+DROP TABLE IF EXISTS clean_sales;
+
+CREATE TABLE clean_sales (
+>>>>>>> a30b0c523790c6320c2dec40042b160b97ca9353
     Store INTEGER,
     Dept INTEGER,
     Date DATE,
@@ -19,4 +25,8 @@ CREATE TABLE IF NOT EXISTS clean_sales (
 
     CPI DOUBLE PRECISION,
     Unemployment DOUBLE PRECISION
+<<<<<<< HEAD
 );
+=======
+);
+>>>>>>> a30b0c523790c6320c2dec40042b160b97ca9353

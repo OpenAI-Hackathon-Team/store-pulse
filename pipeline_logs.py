@@ -24,6 +24,7 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import URL
 
+<<<<<<< HEAD
 from etl.extract import read_features_data, read_store_data, read_train_data
 from etl.load import (
     add_cell_change_details,
@@ -33,6 +34,8 @@ from etl.load import (
     profile_sources,
 )
 
+=======
+>>>>>>> a30b0c523790c6320c2dec40042b160b97ca9353
 load_dotenv()
 
 DB_HOST = os.getenv("DB_HOST")
@@ -69,7 +72,11 @@ def get_table_snapshot() -> dict:
     }
 
 
+<<<<<<< HEAD
 def diagnose_change(before: dict, after: dict, source_changes: list[dict]) -> str:
+=======
+def diagnose_change(before: dict, after: dict) -> str:
+>>>>>>> a30b0c523790c6320c2dec40042b160b97ca9353
     """
     Classifies what kind of change happened, based on row count and
     sales-sum movement between two snapshots.
@@ -78,6 +85,7 @@ def diagnose_change(before: dict, after: dict, source_changes: list[dict]) -> st
     row_delta = after["total_rows"] - before["total_rows"]
     sales_delta = after["total_sales_sum"] - before["total_sales_sum"]
 
+<<<<<<< HEAD
     has_source_changes = any(
         item.get("row_delta")
         or item.get("added_columns")
@@ -90,6 +98,8 @@ def diagnose_change(before: dict, after: dict, source_changes: list[dict]) -> st
 
     if has_source_changes:
         return "source_data_changed"
+=======
+>>>>>>> a30b0c523790c6320c2dec40042b160b97ca9353
     if row_delta == 0 and abs(sales_delta) < 0.01:
         return "no_change"
     elif row_delta > 0 and sales_delta > 0:
@@ -116,6 +126,7 @@ def ensure_pipeline_logs_table():
             rows_before         INTEGER,
             rows_after          INTEGER,
             row_delta           INTEGER,
+<<<<<<< HEAD
             change_type         TEXT,
             changed_files       INTEGER NOT NULL DEFAULT 0,
             changed_cell_count  INTEGER NOT NULL DEFAULT 0,
@@ -131,6 +142,13 @@ def ensure_pipeline_logs_table():
     with engine.begin() as connection:
         connection.execute(create_sql)
         connection.execute(alter_sql)
+=======
+            change_type         TEXT
+        );
+    """)
+    with engine.begin() as connection:
+        connection.execute(create_sql)
+>>>>>>> a30b0c523790c6320c2dec40042b160b97ca9353
 
 
 def save_log_to_supabase(log_entry: dict):
@@ -139,12 +157,19 @@ def save_log_to_supabase(log_entry: dict):
     insert_sql = text("""
         INSERT INTO pipeline_logs
             (run_label, duration_seconds, status, error_message,
+<<<<<<< HEAD
              rows_before, rows_after, row_delta, change_type,
              changed_files, changed_cell_count, source_changes)
         VALUES
             (:run_label, :duration_seconds, :status, :error_message,
              :rows_before, :rows_after, :row_delta, :change_type,
              :changed_files, :changed_cell_count, CAST(:source_changes AS jsonb))
+=======
+             rows_before, rows_after, row_delta, change_type)
+        VALUES
+            (:run_label, :duration_seconds, :status, :error_message,
+             :rows_before, :rows_after, :row_delta, :change_type)
+>>>>>>> a30b0c523790c6320c2dec40042b160b97ca9353
     """)
 
     with engine.begin() as connection:
@@ -157,14 +182,18 @@ def save_log_to_supabase(log_entry: dict):
             "rows_after": log_entry["rows_after"],
             "row_delta": log_entry["row_delta"],
             "change_type": log_entry["change_type"],
+<<<<<<< HEAD
             "changed_files": log_entry["changed_files"],
             "changed_cell_count": log_entry["changed_cell_count"],
             "source_changes": json.dumps(log_entry["source_changes"]),
+=======
+>>>>>>> a30b0c523790c6320c2dec40042b160b97ca9353
         })
 
     print(f"✓ Also saved to Supabase pipeline_logs table")
 
 
+<<<<<<< HEAD
 def collect_source_changes(previous_profile, previous_snapshots) -> list[dict]:
     """Build detailed source changes, including individual edited-cell samples."""
 
@@ -178,6 +207,8 @@ def collect_source_changes(previous_profile, previous_snapshots) -> list[dict]:
     return report
 
 
+=======
+>>>>>>> a30b0c523790c6320c2dec40042b160b97ca9353
 def run_with_logging(pipeline_fn, run_label: str = "manual_run"):
     """
     Wraps a pipeline function call, timing it and logging what changed.
@@ -192,10 +223,13 @@ def run_with_logging(pipeline_fn, run_label: str = "manual_run"):
     print("=" * 60)
 
     before = get_table_snapshot()
+<<<<<<< HEAD
     previous_source_profile = load_previous_source_profile()
     previous_source_snapshots = load_previous_source_snapshots(
         ["train.csv", "stores.csv", "features.csv"]
     )
+=======
+>>>>>>> a30b0c523790c6320c2dec40042b160b97ca9353
     start_time = time.time()
     status = "success"
     error_message = None
@@ -209,6 +243,7 @@ def run_with_logging(pipeline_fn, run_label: str = "manual_run"):
 
     duration_seconds = round(time.time() - start_time, 2)
     after = get_table_snapshot()
+<<<<<<< HEAD
     source_changes = collect_source_changes(
         previous_source_profile,
         previous_source_snapshots,
@@ -223,6 +258,9 @@ def run_with_logging(pipeline_fn, run_label: str = "manual_run"):
         or item.get("changed_columns")
     )
     changed_cell_count = sum(item.get("changed_cell_count", 0) for item in source_changes)
+=======
+    change_type = diagnose_change(before, after)
+>>>>>>> a30b0c523790c6320c2dec40042b160b97ca9353
 
     log_entry = {
         "run_label": run_label,
@@ -234,9 +272,12 @@ def run_with_logging(pipeline_fn, run_label: str = "manual_run"):
         "rows_after": after["total_rows"],
         "row_delta": after["total_rows"] - before["total_rows"],
         "change_type": change_type,
+<<<<<<< HEAD
         "changed_files": changed_files,
         "changed_cell_count": changed_cell_count,
         "source_changes": source_changes,
+=======
+>>>>>>> a30b0c523790c6320c2dec40042b160b97ca9353
     }
 
     # Append to local log file (one JSON object per line)
@@ -253,8 +294,11 @@ def run_with_logging(pipeline_fn, run_label: str = "manual_run"):
     print(f"Rows after   : {after['total_rows']:,}")
     print(f"Row delta    : {log_entry['row_delta']:+,}")
     print(f"Change type  : {change_type}")
+<<<<<<< HEAD
     print(f"Files changed: {changed_files}")
     print(f"Cells changed: {changed_cell_count:,}")
+=======
+>>>>>>> a30b0c523790c6320c2dec40042b160b97ca9353
     print(f"\n✓ Logged to {LOG_FILE}")
 
     return log_entry
@@ -269,4 +313,8 @@ if __name__ == "__main__":
 
     print("\n--- To use this for real, wrap your actual pipeline call: ---")
     print("from etl.load import main as run_etl")
+<<<<<<< HEAD
     print("run_with_logging(run_etl, run_label='etl_load')")
+=======
+    print("run_with_logging(run_etl, run_label='etl_load')")
+>>>>>>> a30b0c523790c6320c2dec40042b160b97ca9353
