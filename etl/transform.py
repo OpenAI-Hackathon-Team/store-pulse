@@ -189,6 +189,15 @@ def transform_data(train_df, stores_df, features_df):
     print("Starting Data Transformation...")
     print("=" * 60)
 
+    # Validate the raw inputs before any coercion.  Cleaning malformed values
+    # first would turn invalid numbers into 0 and arbitrary holiday labels into
+    # False, which hides source-data problems from the schema checks.
+    validate_sources({
+        "train": train_df,
+        "stores": stores_df,
+        "features": features_df,
+    })
+
     # Normalize the shared merge key before converting dates.  A missing or
     # malformed feature flag should not prevent an otherwise valid new feature
     # row from being loaded.
@@ -203,15 +212,6 @@ def transform_data(train_df, stores_df, features_df):
 
     # Handle missing values
     features_df = handle_missing_values(features_df)
-
-    # Enforce the rules in Config/schema.yaml before any source rows are
-    # merged or loaded.  This stops bad required keys, store metadata, and
-    # malformed values from reaching the analytics table.
-    validate_sources({
-        "train": train_df,
-        "stores": stores_df,
-        "features": features_df,
-    })
 
     # Merge datasets
     final_df = merge_datasets(

@@ -340,7 +340,7 @@ def show_dashboard(data: pd.DataFrame) -> None:
 
         with st.container(border=True):
             st.subheader("Sales and external factors")
-            st.caption("Each point is a selected sales record; transparency makes dense regions readable")
+            st.caption("Each point is a selected sales record; selections above 3,000 rows are sampled for responsive charts")
             factor_charts = []
             for column, label in [
                 ("temperature", "Temperature"),
@@ -349,6 +349,8 @@ def show_dashboard(data: pd.DataFrame) -> None:
                 ("unemployment", "Unemployment"),
             ]:
                 factor_data = sales.dropna(subset=[column, "weekly_sales"])
+                if len(factor_data) > 3_000:
+                    factor_data = factor_data.sample(n=3_000, random_state=42)
                 factor_charts.append(
                     alt.Chart(factor_data).mark_circle(opacity=0.3, color="#38BDF8").encode(
                         x=alt.X(f"{column}:Q", title=label),

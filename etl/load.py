@@ -408,13 +408,12 @@ def ensure_table_columns(df: pd.DataFrame):
             print(f"Added new Supabase column: {column_name} ({column_type})")
 
 
-def clear_existing_data():
-    """Replace table contents without blocking concurrent dashboard reads.
+def replace_table_data(df: pd.DataFrame):
+    """Replace ``clean_sales`` contents atomically.
 
-    ``TRUNCATE`` requires an ACCESS EXCLUSIVE lock, so even a long-running
-    read from Supabase can cause it to hit the project's statement timeout.
-    ``DELETE`` permits ordinary SELECT queries to continue while the next
-    snapshot is being prepared.
+    The delete and all inserts share one transaction.  If a chunk fails, the
+    transaction rolls back and dashboard users continue to see the prior
+    successful snapshot instead of an empty or partially loaded table.
     """
 
     with engine.begin() as connection:
@@ -422,6 +421,13 @@ def clear_existing_data():
         # longer than Supabase's default statement timeout to remove.
         connection.execute(text("SET LOCAL statement_timeout = '120s'"))
         connection.execute(text("DELETE FROM clean_sales"))
+        df.to_sql(
+            name="clean_sales",
+            con=connection,
+            if_exists="append",
+            index=False,
+            chunksize=500,
+        )
 
 
 def remove_obsolete_dynamic_columns(df: pd.DataFrame):
@@ -462,15 +468,7 @@ def load_to_database(df):
         remove_obsolete_dynamic_columns(df)
         # The table structure persists, but the data is a fresh snapshot of
         # the source CSVs. This prevents duplicate records across runs.
-        clear_existing_data()
-
-        df.to_sql(
-            name="clean_sales",
-            con=engine,
-            if_exists="append",
-            index=False,
-            chunksize=500
-        )
+        replace_table_data(df)
 
         print(f"[OK] {len(df):,} rows inserted.")
 
