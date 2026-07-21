@@ -409,10 +409,19 @@ def ensure_table_columns(df: pd.DataFrame):
 
 
 def clear_existing_data():
-    """Replace the table contents on each run without deleting its schema."""
+    """Replace table contents without blocking concurrent dashboard reads.
+
+    ``TRUNCATE`` requires an ACCESS EXCLUSIVE lock, so even a long-running
+    read from Supabase can cause it to hit the project's statement timeout.
+    ``DELETE`` permits ordinary SELECT queries to continue while the next
+    snapshot is being prepared.
+    """
 
     with engine.begin() as connection:
-        connection.execute(text("TRUNCATE TABLE clean_sales"))
+        # The table contains a few hundred thousand rows, which can take
+        # longer than Supabase's default statement timeout to remove.
+        connection.execute(text("SET LOCAL statement_timeout = '120s'"))
+        connection.execute(text("DELETE FROM clean_sales"))
 
 
 def remove_obsolete_dynamic_columns(df: pd.DataFrame):
