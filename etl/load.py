@@ -305,11 +305,11 @@ def test_connection():
         with engine.connect() as connection:
             result = connection.execute(text("SELECT version();"))
 
-            print("✓ Connected Successfully")
+            print("[OK] Connected successfully")
             print(result.fetchone()[0])
 
     except Exception as e:
-        print("✗ Connection Failed")
+        print("[ERROR] Connection failed")
         raise e
 
 
@@ -331,10 +331,10 @@ def execute_schema():
         with engine.begin() as connection:
             connection.execute(text(sql))
 
-        print("✓ Table created successfully")
+        print("[OK] Table created successfully")
 
     except Exception as e:
-        print("✗ Failed creating table")
+        print("[ERROR] Failed creating table")
         raise e
 
 
@@ -351,10 +351,10 @@ def save_processed_csv(df):
 
     try:
         df.to_csv(OUTPUT_CSV, index=False)
-        print(f"✓ Saved to:\n{OUTPUT_CSV}")
+        print(f"[OK] Saved to:\n{OUTPUT_CSV}")
 
     except Exception as e:
-        print("✗ Failed to save CSV!")
+        print("[ERROR] Failed to save CSV!")
         raise e
 
 
@@ -439,7 +439,7 @@ def remove_obsolete_dynamic_columns(df: pd.DataFrame):
         for column_name in sorted(obsolete_columns):
             quoted_name = identifier_preparer.quote(column_name)
             connection.execute(text(f"ALTER TABLE clean_sales DROP COLUMN {quoted_name}"))
-            print(f"âœ“ Removed Supabase column: {column_name}")
+            print(f"[OK] Removed Supabase column: {column_name}")
 
 
 def load_to_database(df):
@@ -472,10 +472,10 @@ def load_to_database(df):
             chunksize=500
         )
 
-        print(f"✓ {len(df):,} rows inserted.")
+        print(f"[OK] {len(df):,} rows inserted.")
 
     except Exception as e:
-        print("✗ Data load failed")
+        print("[ERROR] Data load failed")
         print(type(e))
         print(str(e))
         raise

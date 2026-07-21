@@ -162,7 +162,7 @@ def save_log_to_supabase(log_entry: dict):
             "source_changes": json.dumps(log_entry["source_changes"]),
         })
 
-    print(f"✓ Also saved to Supabase pipeline_logs table")
+    print("[OK] Also saved to the Supabase pipeline_logs table")
 
 
 def collect_source_changes(previous_profile, previous_snapshots) -> list[dict]:
@@ -205,7 +205,7 @@ def run_with_logging(pipeline_fn, run_label: str = "manual_run"):
     except Exception as e:
         status = "failed"
         error_message = str(e)
-        print(f"✗ Pipeline failed: {e}")
+        print(f"[ERROR] Pipeline failed: {e}")
 
     duration_seconds = round(time.time() - start_time, 2)
     after = get_table_snapshot()
@@ -255,7 +255,7 @@ def run_with_logging(pipeline_fn, run_label: str = "manual_run"):
     print(f"Change type  : {change_type}")
     print(f"Files changed: {changed_files}")
     print(f"Cells changed: {changed_cell_count:,}")
-    print(f"\n✓ Logged to {LOG_FILE}")
+    print(f"\n[OK] Logged to {LOG_FILE}")
 
     return log_entry
 
